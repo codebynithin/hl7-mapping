@@ -1,7 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Hl7MappingDocument, Hl7MappingSummary } from '../models/hl7-mapping.model';
+import {
+  Hl7MappingDocument,
+  Hl7MappingEntry,
+  Hl7MappingSummary,
+} from '../models/hl7-mapping.model';
 import { Hl7MessageDocument, Hl7MessageSummary } from '../models/hl7-message.model';
 
 @Injectable({ providedIn: 'root' })
@@ -15,6 +19,12 @@ export class Hl7ApiService {
 
   getMapping(id: string): Observable<Hl7MappingDocument> {
     return this.http.get<Hl7MappingDocument>(`${this.base}/hl7-mapping/${encodeURIComponent(id)}`);
+  }
+
+  updateMapping(id: string, hl7Mappings: Hl7MappingEntry[]): Observable<Hl7MappingDocument> {
+    return this.http.put<Hl7MappingDocument>(`${this.base}/hl7-mapping/${encodeURIComponent(id)}`, {
+      hl7Mappings,
+    });
   }
 
   listMessages(): Observable<Hl7MessageSummary[]> {

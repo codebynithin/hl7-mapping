@@ -26,7 +26,9 @@
         <ng-template pTemplate="item" let-m>
           <div class="opt">
             <span class="opt__name">{{ m.displayName }}</span>
-            <span class="opt__meta">{{ m.type }}{{ m.direction ? ' · ' + m.direction : '' }} · {{ m.fieldCount }}</span>
+            <span class="opt__meta"
+              >{{ m.type }}{{ m.direction ? ' · ' + m.direction : '' }} · {{ m.fieldCount }}</span
+            >
           </div>
         </ng-template>
       </p-dropdown>
@@ -133,8 +135,38 @@
       </div>
     }
   </main>
+
+  @if (state.mapping()) {
+    <footer class="actions">
+      @if (state.dirty()) {
+        <span class="actions__hint">Unsaved changes</span>
+      }
+      <button
+        pButton
+        type="button"
+        label="Cancel"
+        class="p-button-outlined hl7-btn-navy"
+        [disabled]="!state.dirty() || state.saving()"
+        (click)="state.cancel()"
+      ></button>
+      <button
+        pButton
+        type="button"
+        label="Save"
+        icon="pi pi-check"
+        class="hl7-btn-solid"
+        [disabled]="!state.dirty()"
+        [loading]="state.saving()"
+        (click)="state.save()"
+      ></button>
+    </footer>
+  }
 </div>
 
 @if (previewOpen() && state.messageDoc(); as message) {
-  <app-message-preview-dialog [name]="message.name" [message]="message.message" (closed)="previewOpen.set(false)" />
+  <app-message-preview-dialog
+    [name]="message.name"
+    [message]="message.message"
+    (closed)="previewOpen.set(false)"
+  />
 }

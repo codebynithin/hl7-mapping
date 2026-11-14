@@ -1,10 +1,15 @@
 const { Router } = require('express');
-const { listMappings, getMapping } = require('../controllers/hl7-mapping.controller');
+const {
+  listMappings,
+  getMapping,
+  updateMapping,
+} = require('../controllers/hl7-mapping.controller');
 const { validateObjectId } = require('../middleware/validate-object-id');
 
 const router = Router();
 
 router.get('/', listMappings);
 router.get('/:id', validateObjectId('id'), getMapping);
+router.put('/:id', validateObjectId('id'), updateMapping);
 
 module.exports = router;

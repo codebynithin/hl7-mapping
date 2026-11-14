@@ -1,7 +1,7 @@
 {
   "name": "hl7-mapping-backend",
   "version": "1.0.0",
-  "description": "Read-only API for HL7 mappings and sample HL7 messages (config-service DB)",
+  "description": "API for HL7 mappings and sample HL7 messages (config-service DB)",
   "private": true,
   "main": "src/server.js",
   "type": "commonjs",

@@ -1,9 +1,14 @@
 :host {
   display: block;
+  min-height: 100vh;
 }
 
 .page {
-  padding: 0.75rem 1rem 2rem;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding: 0.75rem 1rem 0;
 }
 
 .toolbar {
@@ -61,6 +66,27 @@
 
 .content {
   position: relative;
+  flex: 1 1 auto;
+}
+
+.actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin: 0.75rem -1rem 0;
+  padding: 0.75rem 1rem;
+  background: var(--hl7-surface);
+  border-top: 1px solid var(--hl7-rule);
+}
+
+.actions__hint {
+  margin-right: auto;
+  font-size: 12px;
+  color: var(--hl7-muted);
 }
 
 :host ::ng-deep .content__progress.p-progressbar {

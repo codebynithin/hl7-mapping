@@ -15,9 +15,24 @@
     "start:prod": "NODE_ENV=production node backend/src/server.js",
     "build": "npm run build --prefix frontend",
     "test": "npm test --prefix frontend -- --watch=false --browsers=ChromeHeadless",
-    "seed": "npm run seed --prefix backend"
+    "seed": "npm run seed --prefix backend",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "prepare": "husky"
   },
   "devDependencies": {
-    "concurrently": "~9.2.5"
+    "@eslint/js": "~10.0.1",
+    "concurrently": "~9.2.5",
+    "eslint": "~10.15.0",
+    "husky": "~9.1.7",
+    "lint-staged": "~17.6.0",
+    "prettier": "~3.10.1"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{ts,html,scss,css,json,md,yml,yaml}": "prettier --write"
   }
 }

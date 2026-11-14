@@ -2,9 +2,9 @@
 
 A MEAN monorepo for browsing HL7 mapping configurations against sample HL7 messages.
 
-| App         | Stack                                        | Port                         |
-| ----------- | -------------------------------------------- | ---------------------------- |
-| `backend/`  | Node 20+, Express 5, MongoDB driver 7        | `PORT` in `.env` (3000)      |
+| App         | Stack                                        | Port                             |
+| ----------- | -------------------------------------------- | -------------------------------- |
+| `backend/`  | Node 20+, Express 5, MongoDB driver 7        | `PORT` in `.env` (3000)          |
 | `frontend/` | Angular 17 (standalone, signals), PrimeNG 17 | `FRONTEND_PORT` in `.env` (4200) |
 
 ## Prerequisites
@@ -25,27 +25,27 @@ npm run start:dev               # API on PORT + UI on FRONTEND_PORT, one termina
 
 `.env` is gitignored. Both apps load the root file through `scripts/load-env.js`:
 
-| Variable        | Used by                                                                 |
-| --------------- | ----------------------------------------------------------------------- |
-| `MONGO_URI`     | Backend connection                                                      |
-| `DB_NAME`       | Backend database (`config-service`)                                     |
-| `PORT`          | Express listen port, and the Angular dev proxy target                  |
-| `FRONTEND_PORT` | `ng serve` port (`npm start` in `frontend/` reads it)                   |
+| Variable        | Used by                                                                         |
+| --------------- | ------------------------------------------------------------------------------- |
+| `MONGO_URI`     | Backend connection                                                              |
+| `DB_NAME`       | Backend database (`config-service`)                                             |
+| `PORT`          | Express listen port, and the Angular dev proxy target                           |
+| `FRONTEND_PORT` | `ng serve` port (`npm start` in `frontend/` reads it)                           |
 | `CORS_ORIGIN`   | Origins allowed to call the API directly. Keep it aligned with `FRONTEND_PORT`. |
 
 A variable already set in the shell overrides the file, so `DB_NAME=scratch npm run seed` still works.
 
 Output is prefixed `[api]` / `[web]`. If either app fails to start, the other is stopped too.
 
-| Root script             | What it does                                                    |
-| ----------------------- | --------------------------------------------------------------- |
-| `npm run start:dev`     | Backend with `node --watch` and `ng serve`, side by side        |
-| `npm start`             | Same, but the backend runs without watch mode                   |
-| `npm run dev:backend`   | Backend only (`backend` → `npm run start:dev`)                  |
-| `npm run dev:frontend`  | Frontend only; extra args go to `ng serve`, e.g. `npm run dev:frontend -- --port 4300` |
-| `npm run seed`          | Seed sample data (see below)                                    |
-| `npm test`              | Frontend unit tests, single run in headless Chrome              |
-| `npm run build`         | Production build of the frontend into `frontend/dist/`          |
+| Root script            | What it does                                                                           |
+| ---------------------- | -------------------------------------------------------------------------------------- |
+| `npm run start:dev`    | Backend with `node --watch` and `ng serve`, side by side                               |
+| `npm start`            | Same, but the backend runs without watch mode                                          |
+| `npm run dev:backend`  | Backend only (`backend` → `npm run start:dev`)                                         |
+| `npm run dev:frontend` | Frontend only; extra args go to `ng serve`, e.g. `npm run dev:frontend -- --port 4300` |
+| `npm run seed`         | Seed sample data (see below)                                                           |
+| `npm test`             | Frontend unit tests, single run in headless Chrome                                     |
+| `npm run build`        | Production build of the frontend into `frontend/dist/`                                 |
 
 The sections below run each app on its own.
 
@@ -57,15 +57,14 @@ npm install                 # the root .env must already exist
 npm run start:dev           # node --watch; use `npm start` without watch
 ```
 
-All endpoints are read-only:
-
-| Method | Path                    | Returns                                                                  |
-| ------ | ----------------------- | ------------------------------------------------------------------------ |
-| GET    | `/api/hl7-mapping`      | Mapping summaries (`_id`, `displayName`, `type`, `direction`, `fieldCount`, …) |
-| GET    | `/api/hl7-mapping/:id`  | Full mapping document, including `hl7Mappings`                           |
-| GET    | `/api/hl7-message`      | Message summaries, without the `message` body                            |
-| GET    | `/api/hl7-message/:id`  | Full message document                                                    |
-| GET    | `/api/health`           | `{ status: 'ok' }`                                                       |
+| Method | Path                   | Returns                                                                        |
+| ------ | ---------------------- | ------------------------------------------------------------------------------ |
+| GET    | `/api/hl7-mapping`     | Mapping summaries (`_id`, `displayName`, `type`, `direction`, `fieldCount`, …) |
+| GET    | `/api/hl7-mapping/:id` | Full mapping document, including `hl7Mappings`                                 |
+| PUT    | `/api/hl7-mapping/:id` | Replaces `hl7Mappings` from `{ hl7Mappings: [...] }` and returns the document  |
+| GET    | `/api/hl7-message`     | Message summaries, without the `message` body                                  |
+| GET    | `/api/hl7-message/:id` | Full message document                                                          |
+| GET    | `/api/health`          | `{ status: 'ok' }`                                                             |
 
 An id that isn't a valid ObjectId returns `400`, and an unknown id returns `404`. Errors use the JSON shape `{ status, error }`, and 5xx details are logged on the server but not returned to the client.
 
@@ -109,7 +108,7 @@ The selected sample message is parsed in the browser (`core/services/hl7-parser.
 - Field repetitions (`~`) use the first repetition.
 - Paths that are mapped but missing from the sample are added as "not in sample" nodes so existing selections stay visible.
 
-Switching the sample message keeps all mapping edits; only the displayed sample values change.
+Switching the sample message keeps all mapping edits; only the displayed sample values change. Save sends the edited mapping with `PUT /api/hl7-mapping/:id`. Cancel restores the last loaded or saved mapping. A field with no HL7 path is kept locally until one is selected.
 
 ## Deploy on Render
 
@@ -123,8 +122,7 @@ The Blueprint is read from GitHub, so commit and push `render.yaml` to `master` 
 
 ## Not implemented yet
 
-Everything is read-only on the server. Edits made in the UI (HL7 paths, default values, adding or removing fields) live in `MappingStateService` signals and are lost on reload. These features are marked with `TODO`s in the code:
+Mapping edits stay in the browser until Save. Save sends `PUT /api/hl7-mapping/:id`. Cancel restores the last loaded or saved mapping. These features are still marked with `TODO`s:
 
-- Persisting mapping edits needs `PUT /api/hl7-mapping/:id`.
 - Deleting a sample message needs `DELETE /api/hl7-message/:id`. The trash button is disabled.
 - Uploading a sample message is UI only and shows an info toast.

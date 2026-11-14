@@ -5,7 +5,11 @@ import {
   MappingField,
   MappingSection,
 } from '../models/hl7-mapping.model';
-import { FALLBACK_SECTION_KEY, SECTION_DEFINITIONS, SectionDefinition } from '../models/mapping-sections';
+import {
+  FALLBACK_SECTION_KEY,
+  SECTION_DEFINITIONS,
+  SectionDefinition,
+} from '../models/mapping-sections';
 import { toHl7Path } from '../services/hl7-parser.service';
 
 let fieldSeq = 0;
@@ -43,7 +47,10 @@ export function mappingPaths(doc: Pick<Hl7MappingDocument, 'hl7Mappings'>): stri
  * Entries sharing a variable and value become one field with several `hl7Fields`;
  * entries with the same variable but different constants (e.g. `HDR.TEMP`) stay separate.
  */
-export function toEditableMapping(doc: Hl7MappingDocument, newId: () => string = createFieldId): EditableMapping {
+export function toEditableMapping(
+  doc: Hl7MappingDocument,
+  newId: () => string = createFieldId,
+): EditableMapping {
   const grouped = new Map<string, { field: MappingField; segment: string }>();
 
   for (const entry of doc.hl7Mappings ?? []) {
@@ -98,7 +105,7 @@ export function toEditableMapping(doc: Hl7MappingDocument, newId: () => string =
   };
 }
 
-/** Flattens the editable view back into the stored `hl7Mappings` shape (for a future PUT). */
+/** Flattens the editable view back into the stored `hl7Mappings` shape. */
 export function toHl7MappingEntries(mapping: EditableMapping): Hl7MappingEntry[] {
   const walk = (sections: MappingSection[]): Hl7MappingEntry[] =>
     sections.flatMap((section) => [
@@ -115,6 +122,31 @@ export function toHl7MappingEntries(mapping: EditableMapping): Hl7MappingEntry[]
           return entry;
         }),
       ),
+      ...walk(section.children),
+    ]);
+  return walk(mapping.sections);
+}
+
+/** Stable signature of the editable fields, ignoring client-only ids. */
+export function mappingFingerprint(mapping: EditableMapping): string {
+  const walk = (sections: MappingSection[]): unknown[] =>
+    sections.map((section) => ({
+      fields: section.fields.map((field) => ({
+        key: field.key,
+        hl7Fields: field.hl7Fields,
+        defaultValue: field.defaultValue,
+        description: field.description ?? null,
+      })),
+      children: walk(section.children),
+    }));
+  return JSON.stringify(walk(mapping.sections));
+}
+
+/** Labels of fields that have no HL7 path and so cannot be stored. */
+export function fieldsMissingPaths(mapping: EditableMapping): string[] {
+  const walk = (sections: MappingSection[]): string[] =>
+    sections.flatMap((section) => [
+      ...section.fields.filter((field) => field.hl7Fields.length === 0).map((field) => field.label),
       ...walk(section.children),
     ]);
   return walk(mapping.sections);
