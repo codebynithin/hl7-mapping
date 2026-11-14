@@ -9,6 +9,15 @@ const COLLECTIONS = Object.freeze({
 let client;
 let db;
 
+function mongoTarget(uri) {
+  try {
+    const parsed = new URL(uri);
+    return `${parsed.protocol}//${parsed.host}`;
+  } catch {
+    return 'mongodb';
+  }
+}
+
 async function connect(uri = process.env.MONGO_URI, dbName = process.env.DB_NAME) {
   if (db) return db;
   if (!uri || !dbName) {
@@ -17,7 +26,7 @@ async function connect(uri = process.env.MONGO_URI, dbName = process.env.DB_NAME
   client = new MongoClient(uri, { serverSelectionTimeoutMS: 5000 });
   await client.connect();
   db = client.db(dbName);
-  console.log(`[db] connected to ${uri} / ${dbName}`);
+  console.log(`[db] connected to ${mongoTarget(uri)} / ${dbName}`);
   return db;
 }
 

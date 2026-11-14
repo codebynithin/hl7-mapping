@@ -115,7 +115,7 @@ Switching the sample message keeps all mapping edits; only the displayed sample 
 
 `render.yaml` defines one free web service in the Oregon region. Express serves both `/api` and the Angular build, so the browser keeps calling `/api` on the same origin.
 
-Render builds with `npm install && npm run build` and starts with `npm run start:prod`. Node 20 comes from `NODE_VERSION`.
+Render builds with `npm install && npm run build` and starts with `npm run start:prod`. Node 20 comes from `NODE_VERSION`. Leave `PORT` unset so Render can assign it. `npm start` does the same thing when `RENDER=true`, and locally it still runs the API plus `ng serve`.
 
 Before the service can start, set `MONGO_URI` in the Render dashboard to a database Render can reach, such as MongoDB Atlas. `mongodb://localhost` only works on your machine. `DB_NAME` defaults to `config-service`. `CORS_ORIGIN` is optional because the UI and API share one host.
 

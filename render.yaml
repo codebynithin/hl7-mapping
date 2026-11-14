@@ -8,6 +8,8 @@ services:
     region: oregon
     branch: master
     buildCommand: npm install && npm run build
+    # Serves the built UI and /api. Do not use `npm start` here: that also
+    # launches `ng serve` outside Render, and must not run on the free instance.
     startCommand: npm run start:prod
     healthCheckPath: /api/health
     envVars:

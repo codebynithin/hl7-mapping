@@ -11,7 +11,7 @@
     "start:dev": "concurrently --names api,web --prefix-colors blue,magenta --kill-others-on-fail \"npm:dev:backend\" \"npm:dev:frontend\"",
     "dev:backend": "npm run start:dev --prefix backend",
     "dev:frontend": "npm start --prefix frontend --",
-    "start": "concurrently --names api,web --prefix-colors blue,magenta --kill-others-on-fail \"npm run start:prod\" \"npm:dev:frontend\"",
+    "start": "node scripts/start.js",
     "start:prod": "NODE_ENV=production node backend/src/server.js",
     "build": "npm run build --prefix frontend",
     "test": "npm test --prefix frontend -- --watch=false --browsers=ChromeHeadless",
