@@ -62,10 +62,10 @@
   flex: 0 0 auto;
   margin-left: -1px;
   border-radius: 0;
+  border-left: 1px solid #ddd;
 }
 
 .mf__btn--last {
-  border-left: 1px solid #ddd;
   border-top-right-radius: var(--hl7-radius);
   border-bottom-right-radius: var(--hl7-radius);
 }
