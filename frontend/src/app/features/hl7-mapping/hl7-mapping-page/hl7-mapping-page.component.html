@@ -1,0 +1,140 @@
+<p-toast position="top-right" />
+<p-confirmDialog key="mapping" styleClass="hl7-dialog" [style]="{ width: '26rem' }" />
+
+<div class="page">
+  <header class="toolbar">
+    <span class="p-float-label hl7-float">
+      <p-dropdown
+        inputId="mapping-select"
+        styleClass="toolbar__dropdown"
+        [options]="state.mappings()"
+        optionLabel="displayName"
+        optionValue="_id"
+        [ngModel]="state.selectedMappingId()"
+        (ngModelChange)="state.selectMapping($event)"
+        [autoDisplayFirst]="false"
+        [filter]="true"
+        filterBy="displayName,type,direction,organizationAlias"
+        [showClear]="true"
+        [virtualScroll]="true"
+        [virtualScrollItemSize]="34"
+        [loading]="state.listsLoading()"
+        appendTo="body"
+        panelStyleClass="hl7-dropdown-panel"
+        emptyFilterMessage="No mappings match"
+      >
+        <ng-template pTemplate="item" let-m>
+          <div class="opt">
+            <span class="opt__name">{{ m.displayName }}</span>
+            <span class="opt__meta">{{ m.type }}{{ m.direction ? ' · ' + m.direction : '' }} · {{ m.fieldCount }}</span>
+          </div>
+        </ng-template>
+      </p-dropdown>
+      <label for="mapping-select">Select a mapping</label>
+    </span>
+
+    <span class="p-float-label hl7-float">
+      <p-dropdown
+        inputId="message-select"
+        styleClass="toolbar__dropdown"
+        [options]="messageOptions()"
+        optionLabel="name"
+        optionValue="_id"
+        [ngModel]="state.selectedMessageId()"
+        (ngModelChange)="state.selectMessage($event)"
+        [autoDisplayFirst]="false"
+        [filter]="true"
+        filterBy="name,configName,organizationAlias"
+        [showClear]="true"
+        [virtualScroll]="true"
+        [virtualScrollItemSize]="34"
+        [loading]="state.listsLoading()"
+        appendTo="body"
+        panelStyleClass="hl7-dropdown-panel"
+        emptyFilterMessage="No messages match"
+      >
+        <ng-template pTemplate="item" let-m>
+          <div class="opt">
+            <span class="opt__name">{{ m.name }}</span>
+            @if (m.linked) {
+              <span class="opt__tag">this mapping</span>
+            } @else if (m.configName) {
+              <span class="opt__meta">{{ m.configName }}</span>
+            }
+          </div>
+        </ng-template>
+      </p-dropdown>
+      <label for="message-select">Select a message to preview</label>
+    </span>
+
+    <button
+      pButton
+      type="button"
+      icon="pi pi-eye"
+      class="p-button-outlined hl7-btn-navy toolbar__icon-btn"
+      pTooltip="Preview raw message"
+      tooltipPosition="bottom"
+      aria-label="Preview raw message"
+      [disabled]="!state.messageDoc()"
+      (click)="previewOpen.set(true)"
+    ></button>
+    <button
+      pButton
+      type="button"
+      icon="pi pi-trash"
+      class="p-button-outlined hl7-btn-danger toolbar__icon-btn"
+      aria-label="Delete message"
+      [disabled]="true"
+      (click)="onDeleteMessage()"
+    ></button>
+
+    <button
+      pButton
+      type="button"
+      label="Upload"
+      icon="pi pi-upload"
+      class="p-button-outlined hl7-btn-navy toolbar__upload"
+      (click)="onUpload()"
+    ></button>
+  </header>
+
+  <main class="content">
+    @if (state.loading() && state.ready()) {
+      <p-progressBar mode="indeterminate" styleClass="content__progress" />
+    }
+    @if (state.loading() && !state.ready()) {
+      <div class="skeleton" aria-busy="true">
+        @for (row of skeletonRows; track row) {
+          <p-skeleton width="9rem" height="1rem" styleClass="mb-2" />
+          <div class="grid hl7-grid mb-1">
+            @for (col of skeletonCols; track col) {
+              <div class="col-12 md:col-6 xl:col-3"><p-skeleton height="36px" /></div>
+            }
+          </div>
+        }
+      </div>
+    } @else if (state.ready()) {
+      @for (warning of warnings(); track warning) {
+        <div class="notice"><i class="pi pi-exclamation-triangle"></i> {{ warning }}</div>
+      }
+      @for (section of state.mapping()!.sections; track section.key) {
+        <app-mapping-section [section]="section" />
+      }
+    } @else {
+      <div class="empty">
+        <i class="pi pi-sitemap"></i>
+        @if (!state.selectedMappingId() && !state.selectedMessageId()) {
+          <span>Select a mapping and a sample message to start configuring.</span>
+        } @else if (!state.selectedMappingId()) {
+          <span>Select a mapping.</span>
+        } @else {
+          <span>Select a sample message to preview mapped values.</span>
+        }
+      </div>
+    }
+  </main>
+</div>
+
+@if (previewOpen() && state.messageDoc(); as message) {
+  <app-message-preview-dialog [name]="message.name" [message]="message.message" (closed)="previewOpen.set(false)" />
+}

@@ -1,0 +1,102 @@
+<div class="mf">
+  <div class="mf__control" (mousedown)="!treeSelect.overlayVisible && syncTreeExpansion()">
+    <div class="mf__label" aria-hidden="true">
+      <span class="mf__name">{{ field().label }}</span>
+      @if (field().hl7Fields.length) {
+        <span class="mf__paths">{{ pathsLabel() }}</span>
+      }
+    </div>
+
+    <p-treeSelect
+      #treeSelect
+      class="mf__select"
+      containerStyleClass="hl7-treeselect"
+      panelStyleClass="hl7-tree-panel"
+      [panelStyle]="{ width: '320px' }"
+      [options]="tree()"
+      [ngModel]="selectedNodes()"
+      (ngModelChange)="onSelectionChange($event)"
+      (onShow)="syncTreeExpansion()"
+      selectionMode="multiple"
+      [metaKeySelection]="false"
+      [filter]="true"
+      filterBy="label,data.value"
+      filterPlaceholder="Search path or sample value"
+      [filterInputAutoFocus]="true"
+      [resetFilterOnHide]="true"
+      appendTo="body"
+      scrollHeight="400px"
+      placeholder="Select HL7 field"
+      emptyMessage="No HL7 fields in this message"
+      [ariaLabel]="field().label"
+      [pTooltip]="tooltip()"
+      tooltipPosition="top"
+      [showDelay]="600"
+      tooltipStyleClass="hl7-tooltip"
+    >
+      <ng-template pTemplate="value">
+        <div class="mf-value">
+          @if (field().hl7Fields.length) {
+            <span class="mf-value__text" [class.mf-value__text--empty]="!hasAnyValue()">
+              {{ hasAnyValue() ? displayValue() : 'empty in sample' }}
+            </span>
+          } @else if (!hasDefault()) {
+            <span class="mf-value__placeholder">Select HL7 field</span>
+          } @else {
+            <span class="mf-value__text"></span>
+          }
+          @if (hasDefault()) {
+            <span class="mf-value__default" [title]="'Default: ' + field().defaultValue"
+              >Default: {{ field().defaultValue }}</span
+            >
+          }
+        </div>
+      </ng-template>
+
+      <ng-template pTemplate="default" let-node>
+        <div
+          class="hl7-node"
+          [class.hl7-node--segment]="node.data?.kind === 'segment'"
+          [class.hl7-node--missing]="node.data?.missing"
+        >
+          <span class="hl7-node__path">{{ node.label }}</span>
+          @if (node.data?.kind === 'segment' && node.data?.missing) {
+            <span class="hl7-node__value hl7-node__value--hint">not in sample</span>
+          } @else {
+            <span class="hl7-node__value" [title]="node.data?.value">{{ node.data?.value }}</span>
+          }
+          @if (node.selectable !== false) {
+            <i class="pi pi-plus-circle hl7-node__add"></i>
+            <i class="pi pi-check hl7-node__check"></i>
+          }
+        </div>
+      </ng-template>
+    </p-treeSelect>
+  </div>
+
+  <button
+    pButton
+    type="button"
+    icon="pi pi-pencil"
+    class="p-button-text hl7-btn-navy mf__btn"
+    [attr.aria-label]="'Edit default value for ' + field().label"
+    (click)="editing.set(true)"
+  ></button>
+  <button
+    pButton
+    type="button"
+    icon="pi pi-trash"
+    class="p-button-text hl7-btn-danger mf__btn mf__btn--last"
+    [attr.aria-label]="'Remove ' + field().label"
+    (click)="confirmDelete()"
+  ></button>
+</div>
+
+@if (editing()) {
+  <app-default-value-dialog
+    [variable]="field().label"
+    [value]="field().defaultValue"
+    (save)="saveDefault($event)"
+    (cancel)="editing.set(false)"
+  />
+}

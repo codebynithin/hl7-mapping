@@ -1,0 +1,23 @@
+{
+  "name": "hl7-mapping",
+  "version": "1.0.0",
+  "description": "HL7 Mapping Configurator: Express/MongoDB API (backend) + Angular/PrimeNG UI (frontend)",
+  "private": true,
+  "engines": {
+    "node": ">=20.9"
+  },
+  "scripts": {
+    "postinstall": "npm install --include=dev --prefix backend && npm install --include=dev --prefix frontend",
+    "start:dev": "concurrently --names api,web --prefix-colors blue,magenta --kill-others-on-fail \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "dev:backend": "npm run start:dev --prefix backend",
+    "dev:frontend": "npm start --prefix frontend --",
+    "start": "concurrently --names api,web --prefix-colors blue,magenta --kill-others-on-fail \"npm start --prefix backend\" \"npm:dev:frontend\"",
+    "start:prod": "NODE_ENV=production node backend/src/server.js",
+    "build": "npm run build --prefix frontend",
+    "test": "npm test --prefix frontend -- --watch=false --browsers=ChromeHeadless",
+    "seed": "npm run seed --prefix backend"
+  },
+  "devDependencies": {
+    "concurrently": "~9.2.5"
+  }
+}

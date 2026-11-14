@@ -1,0 +1,413 @@
+/* PrimeNG theme rules live in `@layer primeng`, so these un-layered overrides win. */
+
+:root {
+  --hl7-navy: #1e3a5f;
+  --hl7-navy-hover: #f0f4f9;
+  --hl7-danger: #dc2626;
+  --hl7-danger-hover: #fef2f2;
+  --hl7-peach: #fdf1e4;
+  --hl7-text: #1f2937;
+  --hl7-muted: #6b7280;
+  --hl7-rule: #e5e7eb;
+  --hl7-surface: #ffffff;
+  --hl7-radius: 4px;
+  --hl7-control-h: 36px;
+
+  --font-family: 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --primary-color: var(--hl7-navy);
+  --highlight-bg: #e8eef6;
+  --highlight-text-color: var(--hl7-navy);
+}
+
+html {
+  font-size: 14px;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  color: var(--hl7-text);
+  background: var(--hl7-surface);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Compact controls (~36px) ---------- */
+
+.p-component,
+.p-inputtext {
+  font-family: var(--font-family);
+}
+
+.p-inputtext {
+  font-size: 0.9286rem;
+  padding: 0.4375rem 0.625rem;
+  border-radius: var(--hl7-radius);
+  color: var(--hl7-text);
+}
+
+.p-inputtext:enabled:hover,
+.p-dropdown:not(.p-disabled):hover,
+.p-treeselect:not(.p-disabled):hover {
+  border-color: var(--hl7-navy);
+}
+
+.p-inputtext:enabled:focus,
+.p-dropdown:not(.p-disabled).p-focus,
+.p-treeselect:not(.p-disabled).p-focus {
+  border-color: var(--hl7-navy);
+  box-shadow: 0 0 0 2px rgba(30, 58, 95, 0.15);
+}
+
+.p-dropdown {
+  height: var(--hl7-control-h);
+  border-radius: var(--hl7-radius);
+  align-items: center;
+}
+
+.p-dropdown .p-dropdown-label {
+  padding-top: 0;
+  padding-bottom: 0;
+  line-height: calc(var(--hl7-control-h) - 2px);
+}
+
+.p-dropdown .p-dropdown-trigger {
+  width: 2.25rem;
+}
+
+.p-dropdown-panel .p-dropdown-items .p-dropdown-item {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.9286rem;
+}
+
+.p-dropdown-panel .p-dropdown-header {
+  padding: 0.5rem 0.625rem;
+}
+
+.hl7-dropdown-panel.p-dropdown-panel {
+  width: 26rem;
+  max-width: 92vw;
+}
+
+.hl7-dropdown-panel .p-scroller-content {
+  width: 100%;
+}
+
+.p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
+  background: var(--highlight-bg);
+  color: var(--hl7-navy);
+}
+
+.p-button {
+  font-size: 0.9286rem;
+  padding: 0 0.875rem;
+  height: var(--hl7-control-h);
+  border-radius: var(--hl7-radius);
+}
+
+.p-button.p-button-icon-only {
+  width: var(--hl7-control-h);
+  height: var(--hl7-control-h);
+  padding: 0;
+}
+
+.p-button.p-button-sm {
+  height: 32px;
+  font-size: 0.875rem;
+}
+
+/* Navy / red outlined & text buttons */
+.p-button.hl7-btn-navy.p-button-outlined,
+.p-button.hl7-btn-navy.p-button-text {
+  color: var(--hl7-navy);
+}
+
+.p-button.hl7-btn-navy.p-button-outlined {
+  border-color: var(--hl7-navy);
+}
+
+.p-button.hl7-btn-navy.p-button-outlined:enabled:hover,
+.p-button.hl7-btn-navy.p-button-text:enabled:hover {
+  color: var(--hl7-navy);
+  background: var(--hl7-navy-hover);
+}
+
+.p-button.hl7-btn-navy.p-button-outlined:enabled:hover {
+  border-color: var(--hl7-navy);
+}
+
+.p-button.hl7-btn-danger.p-button-outlined,
+.p-button.hl7-btn-danger.p-button-text {
+  color: var(--hl7-danger);
+}
+
+.p-button.hl7-btn-danger.p-button-outlined {
+  border-color: #fca5a5;
+}
+
+.p-button.hl7-btn-danger.p-button-outlined:enabled:hover,
+.p-button.hl7-btn-danger.p-button-text:enabled:hover {
+  color: var(--hl7-danger);
+  background: var(--hl7-danger-hover);
+}
+
+.p-button.hl7-btn-danger.p-button-outlined:enabled:hover {
+  border-color: var(--hl7-danger);
+}
+
+.p-button.hl7-btn-solid {
+  background: var(--hl7-navy);
+  border-color: var(--hl7-navy);
+  color: #fff;
+}
+
+.p-button.hl7-btn-solid:enabled:hover {
+  background: #16304f;
+  border-color: #16304f;
+}
+
+.p-button:focus {
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 0 4px rgba(30, 58, 95, 0.35);
+}
+
+/* ---------- Outlined float label (label sits on the top border) ---------- */
+
+.p-float-label.hl7-float {
+  display: inline-block;
+}
+
+.p-float-label.hl7-float > label {
+  left: 0.625rem;
+  font-size: 0.9286rem;
+  color: var(--hl7-muted);
+}
+
+.p-float-label.hl7-float .p-inputwrapper-filled ~ label,
+.p-float-label.hl7-float .p-inputwrapper-focus ~ label {
+  top: 0;
+  margin-top: 0;
+  transform: translateY(-50%);
+  font-size: 11px;
+  line-height: 1;
+  padding: 0 0.25rem;
+  background: var(--hl7-surface);
+  color: var(--hl7-muted);
+}
+
+.p-float-label.hl7-float .p-inputwrapper-focus ~ label {
+  color: var(--hl7-navy);
+}
+
+/* ---------- Dense field grid ---------- */
+
+.grid.hl7-grid {
+  margin: 0 -0.3125rem;
+}
+
+.grid.hl7-grid > [class*='col'] {
+  padding: 0.5rem 0.3125rem 0.25rem;
+}
+
+/* ---------- Mapping-field TreeSelect ---------- */
+
+.p-treeselect.hl7-treeselect {
+  width: 100%;
+  height: var(--hl7-control-h);
+  border-radius: var(--hl7-radius) 0 0 var(--hl7-radius);
+}
+
+.p-treeselect.hl7-treeselect .p-treeselect-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0 0.625rem;
+  line-height: calc(var(--hl7-control-h) - 2px);
+  font-size: 0.9286rem;
+}
+
+.p-treeselect.hl7-treeselect .p-treeselect-trigger {
+  width: 1.75rem;
+  border-radius: 0;
+}
+
+.p-treeselect.hl7-treeselect .p-treeselect-trigger .p-icon {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.hl7-tree-panel.p-treeselect-panel {
+  max-width: 90vw;
+}
+
+.hl7-tree-panel .p-treeselect-header {
+  padding: 0.375rem 0.5rem;
+}
+
+.hl7-tree-panel .p-treeselect-header .p-treeselect-filter {
+  height: 30px;
+  font-size: 0.875rem;
+}
+
+.hl7-tree-panel .p-treeselect-header .p-treeselect-close {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.hl7-tree-panel .p-tree {
+  padding: 0.25rem;
+  border: 0;
+}
+
+.hl7-tree-panel .p-tree .p-tree-container .p-treenode {
+  padding: 0;
+}
+
+.hl7-tree-panel .p-tree .p-tree-container .p-treenode .p-treenode-content {
+  padding: 0.125rem 0.375rem 0.125rem 0.125rem;
+  border-radius: 3px;
+  font-size: 0.875rem;
+}
+
+.hl7-tree-panel .p-tree .p-tree-container .p-treenode .p-treenode-content .p-tree-toggler {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-right: 0.25rem;
+}
+
+.hl7-tree-panel .p-tree .p-tree-container .p-treenode .p-treenode-children {
+  padding-left: 0.75rem;
+}
+
+.hl7-tree-panel .p-treenode-label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.hl7-tree-panel
+  .p-tree
+  .p-tree-container
+  .p-treenode
+  .p-treenode-content.p-treenode-selectable:not(.p-highlight):hover {
+  background: var(--hl7-peach);
+  color: var(--hl7-text);
+}
+
+.hl7-tree-panel .p-tree .p-tree-container .p-treenode .p-treenode-content.p-highlight {
+  background: var(--highlight-bg);
+  color: var(--hl7-navy);
+}
+
+.hl7-node {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  line-height: 1.5rem;
+}
+
+.hl7-node__path {
+  flex: 0 0 auto;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.hl7-node--segment .hl7-node__path {
+  font-weight: 700;
+  color: var(--hl7-navy);
+}
+
+.hl7-node--missing .hl7-node__path {
+  font-style: italic;
+  color: #9ca3af;
+}
+
+.hl7-node__value {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: right;
+  color: var(--hl7-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hl7-node__value--hint {
+  font-style: italic;
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.hl7-node__add,
+.hl7-node__check {
+  display: none;
+  flex: 0 0 auto;
+  font-size: 0.875rem;
+}
+
+.p-treenode-content:not(.p-highlight):hover .hl7-node__add {
+  display: inline-block;
+  color: #c2410c;
+}
+
+.p-treenode-content.p-highlight .hl7-node__check {
+  display: inline-block;
+  color: var(--hl7-navy);
+}
+
+/* ---------- Dialogs & misc ---------- */
+
+.hl7-dialog.p-dialog .p-dialog-header {
+  padding: 0.75rem 1rem;
+}
+
+.hl7-dialog.p-dialog .p-dialog-content {
+  padding: 0 1rem 0.75rem;
+}
+
+.hl7-dialog.p-dialog .p-dialog-footer {
+  padding: 0.5rem 1rem 0.75rem;
+}
+
+.hl7-dialog.p-dialog .p-dialog-footer button {
+  margin: 0 0 0 0.375rem;
+}
+
+.hl7-dialog__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--hl7-navy);
+}
+
+.hl7-dialog__subject {
+  font-weight: 500;
+}
+
+.hl7-dialog__meta {
+  margin-left: 0.5rem;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--hl7-muted);
+}
+
+.hl7-dialog__label {
+  font-size: 12px;
+  color: var(--hl7-muted);
+}
+
+.hl7-dialog__warn {
+  color: #92400e;
+}
+
+.p-confirm-dialog .p-confirm-dialog-icon {
+  color: var(--hl7-danger);
+}
+
+.hl7-tooltip .p-tooltip-text {
+  white-space: pre-line;
+  font-size: 12px;
+  padding: 0.375rem 0.5rem;
+}
+
+.p-treeselect {
+  border: none !important;
+}

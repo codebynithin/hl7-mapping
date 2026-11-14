@@ -1,0 +1,95 @@
+:host {
+  display: block;
+}
+
+.ms__header {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  height: 2rem;
+}
+
+.ms__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0 0.25rem 0 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: var(--hl7-navy);
+  font: inherit;
+
+  .pi {
+    font-size: 0.75rem;
+    width: 1rem;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--hl7-navy);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+}
+
+.ms__title {
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: var(--hl7-navy);
+  white-space: nowrap;
+}
+
+.ms__count {
+  font-size: 11px;
+  color: var(--hl7-muted);
+  background: #f1f5f9;
+  border-radius: 9px;
+  padding: 0 0.375rem;
+  line-height: 16px;
+}
+
+:host ::ng-deep .ms__add.p-button {
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  color: var(--hl7-navy);
+
+  .p-button-icon {
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  &.ms__add--child {
+    color: #6b86a8;
+  }
+}
+
+.ms__rule {
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--hl7-rule);
+  margin-left: 0.25rem;
+}
+
+.ms__body {
+  padding: 0.375rem 0 0.25rem;
+}
+
+.ms--child {
+  margin-left: 1rem;
+  margin-top: 0.125rem;
+
+  .ms__title {
+    font-size: 0.875rem;
+  }
+}
+
+.ms__empty {
+  font-size: 12px;
+  color: var(--hl7-muted);
+  padding: 0.125rem 0 0.375rem;
+
+  .pi {
+    font-size: 10px;
+  }
+}

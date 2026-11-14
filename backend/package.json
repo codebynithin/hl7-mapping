@@ -1,0 +1,23 @@
+{
+  "name": "hl7-mapping-backend",
+  "version": "1.0.0",
+  "description": "Read-only API for HL7 mappings and sample HL7 messages (config-service DB)",
+  "private": true,
+  "main": "src/server.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start:dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "seed": "node scripts/seed.js"
+  },
+  "dependencies": {
+    "cors": "~2.8.6",
+    "dotenv": "~18.0.10",
+    "express": "~5.3.0",
+    "mongodb": "~7.9.0",
+    "morgan": "~1.12.1"
+  }
+}
