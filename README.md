@@ -57,14 +57,15 @@ npm install                 # the root .env must already exist
 npm run start:dev           # node --watch; use `npm start` without watch
 ```
 
-| Method | Path                   | Returns                                                                        |
-| ------ | ---------------------- | ------------------------------------------------------------------------------ |
-| GET    | `/api/hl7-mapping`     | Mapping summaries (`_id`, `displayName`, `type`, `direction`, `fieldCount`, …) |
-| GET    | `/api/hl7-mapping/:id` | Full mapping document, including `hl7Mappings`                                 |
-| PUT    | `/api/hl7-mapping/:id` | Replaces `hl7Mappings` from `{ hl7Mappings: [...] }` and returns the document  |
-| GET    | `/api/hl7-message`     | Message summaries, without the `message` body                                  |
-| GET    | `/api/hl7-message/:id` | Full message document                                                          |
-| GET    | `/api/health`          | `{ status: 'ok' }`                                                             |
+| Method | Path                         | Returns                                                                        |
+| ------ | ---------------------------- | ------------------------------------------------------------------------------ |
+| GET    | `/api/hl7-mapping`           | Mapping summaries (`_id`, `displayName`, `type`, `direction`, `fieldCount`, …) |
+| GET    | `/api/hl7-mapping/variables` | Distinct `hl7Mappings.variable` values grouped by HL7 segment                  |
+| GET    | `/api/hl7-mapping/:id`       | Full mapping document, including `hl7Mappings`                                 |
+| PUT    | `/api/hl7-mapping/:id`       | Replaces `hl7Mappings` from `{ hl7Mappings: [...] }` and returns the document  |
+| GET    | `/api/hl7-message`           | Message summaries, without the `message` body                                  |
+| GET    | `/api/hl7-message/:id`       | Full message document                                                          |
+| GET    | `/api/health`                | `{ status: 'ok' }`                                                             |
 
 An id that isn't a valid ObjectId returns `400`, and an unknown id returns `404`. Errors use the JSON shape `{ status, error }`, and 5xx details are logged on the server but not returned to the client.
 

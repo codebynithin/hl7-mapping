@@ -1,13 +1,25 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { AutoFocusModule } from 'primeng/autofocus';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  OnInit,
+  computed,
+  inject,
+  input,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { ButtonModule } from 'primeng/button';
-import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
+import { OverlayPanel, OverlayPanelModule } from 'primeng/overlaypanel';
 import { TooltipModule } from 'primeng/tooltip';
 import { MappingSection } from '../../../core/models/hl7-mapping.model';
 import { MappingStateService } from '../../../core/services/mapping-state.service';
-import { countFields } from '../../../core/utils/mapping-adapter';
+import {
+  countFields,
+  missingVariablesForSection,
+  usedVariableKeys,
+} from '../../../core/utils/mapping-adapter';
 import { MappingFieldComponent } from '../mapping-field/mapping-field.component';
 
 const INITIALLY_EXPANDED = new Set(['messageHeader']);
@@ -15,7 +27,13 @@ const INITIALLY_EXPANDED = new Set(['messageHeader']);
 @Component({
   selector: 'app-mapping-section',
   standalone: true,
-  imports: [FormsModule, ButtonModule, DialogModule, InputTextModule, AutoFocusModule, TooltipModule, MappingFieldComponent],
+  imports: [
+    ButtonModule,
+    InputTextModule,
+    OverlayPanelModule,
+    TooltipModule,
+    MappingFieldComponent,
+  ],
   templateUrl: './mapping-section.component.html',
   styleUrl: './mapping-section.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,33 +47,46 @@ export class MappingSectionComponent implements OnInit {
   readonly expanded = signal(false);
   readonly total = computed(() => countFields(this.section()));
 
-  readonly adding = signal(false);
-  newVariable = '';
-  readonly duplicate = signal(false);
+  /** Variables known for this section that the open mapping does not already use. */
+  readonly missing = computed(() =>
+    missingVariablesForSection(
+      this.state.variableCatalog(),
+      this.section().key,
+      usedVariableKeys(this.state.mapping()),
+    ),
+  );
+  readonly query = signal('');
+  readonly filtered = computed(() => {
+    const term = this.query().trim().toUpperCase();
+    const items = this.missing();
+    return term ? items.filter((variable) => variable.toUpperCase().includes(term)) : items;
+  });
+  private readonly search = viewChild<ElementRef<HTMLInputElement>>('search');
 
   ngOnInit(): void {
-    this.expanded.set(INITIALLY_EXPANDED.has(this.section().key));
+    this.expanded.set(
+      INITIALLY_EXPANDED.has(this.section().key) ||
+        this.state.focusSection() === this.section().key,
+    );
   }
 
   toggle(): void {
     this.expanded.update((v) => !v);
   }
 
-  openAdd(): void {
-    this.newVariable = '';
-    this.duplicate.set(false);
-    this.adding.set(true);
+  openAdd(event: Event, panel: OverlayPanel): void {
+    this.query.set('');
+    panel.toggle(event);
   }
 
-  onVariableInput(value: string): void {
-    this.duplicate.set(this.state.hasVariable(value));
+  focusSearch(): void {
+    queueMicrotask(() => this.search()?.nativeElement.focus());
   }
 
-  confirmAdd(): void {
-    const variable = this.newVariable.trim();
-    if (!variable) return;
+  addVariable(variable: string, panel: OverlayPanel): void {
+    if (!this.missing().includes(variable)) return;
     this.state.addField(this.section().key, variable);
-    this.adding.set(false);
     this.expanded.set(true);
+    panel.hide();
   }
 }

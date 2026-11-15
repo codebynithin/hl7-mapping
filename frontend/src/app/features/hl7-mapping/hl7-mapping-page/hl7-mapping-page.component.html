@@ -122,6 +122,56 @@
       @for (section of state.mapping()!.sections; track section.key) {
         <app-mapping-section [section]="section" />
       }
+      @if (missingSegments().length) {
+        <div class="add-segment">
+          <p-button
+            styleClass="add-segment__btn"
+            aria-label="Add segment"
+            icon="pi pi-plus"
+            label="Add segment"
+            [outlined]="true"
+            (onClick)="openAddSegment($event, segmentPanel)"
+          ></p-button>
+          <p-overlayPanel
+            #segmentPanel
+            appendTo="body"
+            styleClass="ms-add-panel"
+            [dismissable]="true"
+            (onShow)="focusSegmentSearch()"
+          >
+            <div class="ms-add">
+              <div class="ms-add__title">Add segment</div>
+              <input
+                #segmentSearch
+                pInputText
+                class="ms-add__search"
+                type="search"
+                placeholder="Search segments"
+                aria-label="Search segments"
+                [value]="segmentQuery()"
+                (input)="segmentQuery.set($any($event.target).value)"
+              />
+              @if (filteredSegments().length) {
+                <ul class="ms-add__list" role="listbox" aria-label="Segments">
+                  @for (section of filteredSegments(); track section.key) {
+                    <li>
+                      <button
+                        type="button"
+                        role="option"
+                        (click)="addSegment(section.key, segmentPanel)"
+                      >
+                        {{ section.label }}
+                      </button>
+                    </li>
+                  }
+                </ul>
+              } @else {
+                <p class="ms-add__empty">No matching segment</p>
+              }
+            </div>
+          </p-overlayPanel>
+        </div>
+      }
     } @else {
       <div class="empty">
         <i class="pi pi-sitemap"></i>

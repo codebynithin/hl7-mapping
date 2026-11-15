@@ -5,6 +5,7 @@ import {
   Hl7MappingDocument,
   Hl7MappingEntry,
   Hl7MappingSummary,
+  SegmentVariableGroup,
 } from '../models/hl7-mapping.model';
 import { Hl7MessageDocument, Hl7MessageSummary } from '../models/hl7-message.model';
 
@@ -15,6 +16,11 @@ export class Hl7ApiService {
 
   listMappings(): Observable<Hl7MappingSummary[]> {
     return this.http.get<Hl7MappingSummary[]>(`${this.base}/hl7-mapping`);
+  }
+
+  /** Distinct variables grouped by HL7 segment, taken from every stored mapping. */
+  listVariableCatalog(): Observable<SegmentVariableGroup[]> {
+    return this.http.get<SegmentVariableGroup[]>(`${this.base}/hl7-mapping/variables`);
   }
 
   getMapping(id: string): Observable<Hl7MappingDocument> {

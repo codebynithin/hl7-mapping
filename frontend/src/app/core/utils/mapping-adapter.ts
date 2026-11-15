@@ -4,6 +4,7 @@ import {
   Hl7MappingEntry,
   MappingField,
   MappingSection,
+  SegmentVariableGroup,
 } from '../models/hl7-mapping.model';
 import {
   FALLBACK_SECTION_KEY,
@@ -24,6 +25,77 @@ const ALL_DEFINITIONS = flatten(SECTION_DEFINITIONS);
 function variablePrefixes(variable: string): string[] {
   const head = variable.trim().split('.')[0].toUpperCase();
   return [head, head.split('_')[0]];
+}
+
+/** Variables already present on the editable mapping, compared case-insensitively. */
+export function usedVariableKeys(mapping: EditableMapping | null): Set<string> {
+  const keys = new Set<string>();
+  const walk = (sections: MappingSection[]): void => {
+    for (const section of sections) {
+      for (const field of section.fields) {
+        const key = field.key.trim().toUpperCase();
+        if (key) keys.add(key);
+      }
+      walk(section.children);
+    }
+  };
+  if (mapping) walk(mapping.sections);
+  return keys;
+}
+
+/** Name prefixes a section may add: its own prefixes and segment ids, minus anything a child section claims. */
+function addablePrefixes(definition: SectionDefinition): Set<string> {
+  const claimedByChild = new Set(
+    (definition.children ?? []).flatMap((child) => [...child.prefixes, ...child.segments]),
+  );
+  return new Set(
+    [...definition.prefixes, ...definition.segments].filter(
+      (prefix) => !claimedByChild.has(prefix),
+    ),
+  );
+}
+
+/** True when the variable name itself starts with one of the section's prefixes or segment ids. */
+function variableMatchesSection(variable: string, definition: SectionDefinition): boolean {
+  const allowed = addablePrefixes(definition);
+  return variablePrefixes(variable).some((prefix) => allowed.has(prefix));
+}
+
+function belongsToKnownSection(variable: string): boolean {
+  return ALL_DEFINITIONS.some(
+    (definition) =>
+      definition.key !== FALLBACK_SECTION_KEY && variableMatchesSection(variable, definition),
+  );
+}
+
+/**
+ * Catalog variables the user may still add to this section.
+ * Message Header offers only HDR, MSG, and MSH names; Order offers only its own
+ * prefixes and segments (ORD, ORDPHY, ORC, OBR, …). A name that matches no
+ * section is offered under Other. Names already on the open mapping are omitted.
+ */
+export function missingVariablesForSection(
+  catalog: SegmentVariableGroup[],
+  sectionKey: string,
+  used: Set<string>,
+): string[] {
+  const definition = ALL_DEFINITIONS.find((item) => item.key === sectionKey);
+  const seen = new Set<string>();
+  const missing: string[] = [];
+  for (const group of catalog) {
+    for (const variable of group.variables) {
+      const key = variable.trim().toUpperCase();
+      if (!key || seen.has(key) || used.has(key)) continue;
+      const related =
+        sectionKey === FALLBACK_SECTION_KEY
+          ? !belongsToKnownSection(variable)
+          : !!definition && variableMatchesSection(variable, definition);
+      if (!related) continue;
+      seen.add(key);
+      missing.push(variable.trim());
+    }
+  }
+  return missing.sort((a, b) => a.localeCompare(b, 'en', { numeric: true, sensitivity: 'base' }));
 }
 
 /** Section key for a variable: by variable prefix, then by HL7 segment, else "other". */
@@ -127,10 +199,14 @@ export function toHl7MappingEntries(mapping: EditableMapping): Hl7MappingEntry[]
   return walk(mapping.sections);
 }
 
-/** Stable signature of the editable fields, ignoring client-only ids. */
+function sectionHasFields(section: MappingSection): boolean {
+  return section.fields.length > 0 || section.children.some(sectionHasFields);
+}
+
+/** Stable signature of the editable fields, ignoring client-only ids and empty sections. */
 export function mappingFingerprint(mapping: EditableMapping): string {
   const walk = (sections: MappingSection[]): unknown[] =>
-    sections.map((section) => ({
+    sections.filter(sectionHasFields).map((section) => ({
       fields: section.fields.map((field) => ({
         key: field.key,
         hl7Fields: field.hl7Fields,
@@ -203,4 +279,93 @@ export function addFieldToSection(
 
 export function countFields(section: MappingSection): number {
   return section.fields.length + section.children.reduce((n, c) => n + countFields(c), 0);
+}
+
+export interface MissingSection {
+  key: string;
+  label: string;
+}
+
+/**
+ * Section definitions that are not on the mapping. A child is listed only when
+ * its parent is already shown, so adding it has a place to land.
+ */
+export function missingSections(sections: MappingSection[]): MissingSection[] {
+  const present = new Set<string>();
+  const walkPresent = (list: MappingSection[]): void => {
+    for (const section of list) {
+      present.add(section.key);
+      walkPresent(section.children);
+    }
+  };
+  walkPresent(sections);
+
+  const missing: MissingSection[] = [];
+  const walk = (defs: SectionDefinition[], parentPresent: boolean): void => {
+    for (const def of defs) {
+      const here = present.has(def.key);
+      if (!here && parentPresent) missing.push({ key: def.key, label: def.label });
+      if (here) walk(def.children ?? [], true);
+    }
+  };
+  walk(SECTION_DEFINITIONS, true);
+  return missing;
+}
+
+interface DefinitionSite {
+  def: SectionDefinition;
+  siblings: SectionDefinition[];
+  parentKey: string | null;
+}
+
+function findDefinition(key: string): DefinitionSite | null {
+  const walk = (defs: SectionDefinition[], parentKey: string | null): DefinitionSite | null => {
+    for (const def of defs) {
+      if (def.key === key) return { def, siblings: defs, parentKey };
+      const nested = walk(def.children ?? [], def.key);
+      if (nested) return nested;
+    }
+    return null;
+  };
+  return walk(SECTION_DEFINITIONS, null);
+}
+
+function insertAmong(
+  sections: MappingSection[],
+  defs: SectionDefinition[],
+  def: SectionDefinition,
+): MappingSection[] {
+  if (sections.some((section) => section.key === def.key)) return sections;
+  const order = defs.findIndex((item) => item.key === def.key);
+  const section: MappingSection = {
+    key: def.key,
+    label: def.label,
+    order: order + 1,
+    fields: [],
+    children: [],
+  };
+  const rank = new Map(defs.map((item, index) => [item.key, index]));
+  return [...sections, section].sort((a, b) => (rank.get(a.key) ?? 0) - (rank.get(b.key) ?? 0));
+}
+
+/** Inserts an empty section in definition order. No-op when the key is unknown or already present. */
+export function insertSection(sections: MappingSection[], sectionKey: string): MappingSection[] {
+  const site = findDefinition(sectionKey);
+  if (!site) return sections;
+  if (!site.parentKey) return insertAmong(sections, site.siblings, site.def);
+
+  let changed = false;
+  const next = sections.map((section) => {
+    if (section.key === site.parentKey) {
+      const children = insertAmong(section.children, site.siblings, site.def);
+      if (children === section.children) return section;
+      changed = true;
+      return { ...section, children };
+    }
+    const children = insertSection(section.children, sectionKey);
+    if (children === section.children) return section;
+    changed = true;
+    return { ...section, children };
+  });
+  return changed ? next : sections;
 }

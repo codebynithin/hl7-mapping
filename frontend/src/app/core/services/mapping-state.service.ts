@@ -7,12 +7,14 @@ import {
   EditableMapping,
   Hl7MappingDocument,
   Hl7MappingSummary,
+  SegmentVariableGroup,
 } from '../models/hl7-mapping.model';
 import { Hl7MessageDocument, Hl7MessageSummary, ParsedHl7 } from '../models/hl7-message.model';
 import {
   addFieldToSection,
   createFieldId,
   fieldsMissingPaths,
+  insertSection,
   mappingFingerprint,
   mappingPaths,
   toEditableMapping,
@@ -30,6 +32,8 @@ export class MappingStateService {
 
   readonly mappings = signal<Hl7MappingSummary[]>([]);
   readonly messages = signal<Hl7MessageSummary[]>([]);
+  /** Distinct variables per HL7 segment, shared by every mapping. */
+  readonly variableCatalog = signal<SegmentVariableGroup[]>([]);
   readonly listsLoading = signal(false);
 
   readonly selectedMappingId = signal<string | null>(null);
@@ -50,6 +54,8 @@ export class MappingStateService {
     return !!current && saved !== null && mappingFingerprint(current) !== saved;
   });
   readonly saving = signal(false);
+  /** Section key to expand after the user adds a segment that was not on the mapping. */
+  readonly focusSection = signal<string | null>(null);
 
   private readonly mappingLoading = signal(false);
   private readonly messageLoading = signal(false);
@@ -78,6 +84,7 @@ export class MappingStateService {
       (doc) => {
         this.mappingDoc.set(doc);
         const editable = doc ? toEditableMapping(doc) : null;
+        this.focusSection.set(null);
         this.mapping.set(editable);
         this.savedFingerprint.set(editable ? mappingFingerprint(editable) : null);
       },
@@ -93,9 +100,16 @@ export class MappingStateService {
 
   loadLists(): void {
     this.listsLoading.set(true);
-    let pending = 2;
+    let pending = 3;
     const done = () => --pending === 0 && this.listsLoading.set(false);
 
+    this.api
+      .listVariableCatalog()
+      .subscribe({
+        next: (catalog) => this.variableCatalog.set(catalog),
+        error: (err) => this.notifyError('Could not load variable list', err),
+      })
+      .add(done);
     this.api
       .listMappings()
       .subscribe({
@@ -130,9 +144,16 @@ export class MappingStateService {
     this.updateField(fieldId, (f) => ({ ...f, defaultValue }));
   }
 
+  addSection(sectionKey: string): void {
+    const key = sectionKey.trim();
+    if (!key) return;
+    this.focusSection.set(key);
+    this.mapping.update((m) => m && { ...m, sections: insertSection(m.sections, key) });
+  }
+
   addField(sectionKey: string, variable: string): void {
     const key = variable.trim();
-    if (!key) return;
+    if (!key || this.hasVariable(key)) return;
     this.mapping.update(
       (m) =>
         m && {

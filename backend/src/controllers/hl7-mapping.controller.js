@@ -45,6 +45,48 @@ async function listMappings(_req, res, next) {
   }
 }
 
+/**
+ * Distinct `hl7Mappings.variable` values, grouped by HL7 segment.
+ * Casing differs across documents; one spelling is kept per segment.
+ */
+async function listVariableCatalog(_req, res, next) {
+  try {
+    const rows = await collection(COLLECTIONS.mappings)
+      .aggregate([
+        { $unwind: '$hl7Mappings' },
+        {
+          $project: {
+            segment: {
+              $toUpper: { $trim: { input: { $ifNull: ['$hl7Mappings.segment', ''] } } },
+            },
+            variable: { $trim: { input: { $ifNull: ['$hl7Mappings.variable', ''] } } },
+          },
+        },
+        { $match: { segment: { $ne: '' }, variable: { $ne: '' } } },
+        {
+          $group: {
+            _id: { segment: '$segment', key: { $toUpper: '$variable' } },
+            variable: { $first: '$variable' },
+          },
+        },
+        { $group: { _id: '$_id.segment', variables: { $push: '$variable' } } },
+        { $sort: { _id: 1 } },
+      ])
+      .toArray();
+
+    res.json(
+      rows.map((row) => ({
+        segment: row._id,
+        variables: row.variables.sort((a, b) =>
+          a.localeCompare(b, 'en', { numeric: true, sensitivity: 'base' }),
+        ),
+      })),
+    );
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function getMapping(req, res, next) {
   try {
     const [doc] = await collection(COLLECTIONS.mappings)
@@ -124,4 +166,4 @@ async function updateMapping(req, res, next) {
   return getMapping(req, res, next);
 }
 
-module.exports = { listMappings, getMapping, updateMapping };
+module.exports = { listMappings, listVariableCatalog, getMapping, updateMapping };

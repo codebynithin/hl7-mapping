@@ -29,6 +29,12 @@ export interface Hl7MappingSummary {
   updatedAt?: string;
 }
 
+/** Distinct mapping variables that occur on one HL7 segment, across every stored mapping. */
+export interface SegmentVariableGroup {
+  segment: string;
+  variables: string[];
+}
+
 export interface Hl7MappingDocument extends Omit<Hl7MappingSummary, 'fieldCount'> {
   hl7Mappings: Hl7MappingEntry[];
   createdAt?: string;
